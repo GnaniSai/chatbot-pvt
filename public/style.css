@@ -37,7 +37,6 @@ body {
 
 .show-box {
   display: flex;
-  align-items: center;
   width: 85vw;
   height: 90%;
   background-color: rgba(0, 0, 0, 0.455);
@@ -51,7 +50,6 @@ canvas {
 }
 .response-box {
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,6 +58,7 @@ canvas {
   font-weight: 400;
   font-size: 14px;
   font-style: normal;
+  overflow: scroll;
 }
 .scroll-bar {
   overflow-y: scroll;
@@ -83,7 +82,7 @@ form {
   display: flex;
   flex-direction: column;
 }
-#proposal{
+#proposal {
   padding: 10px 20px;
   border: none;
   cursor: pointer;
@@ -156,6 +155,7 @@ textarea {
   color: black;
   background-color: rgba(255, 255, 255, 0.762);
 }
+
 .ai-response {
   width: 100%;
   height: auto;
@@ -183,22 +183,45 @@ ul li {
 strong {
   font-weight: 500;
 }
+.loading {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 @media screen and (max-width: 575px) {
   .show-box {
-    width: 98vw;
-    padding: 5px 10px;
+    width: 95vw;
+    padding: 5px;
   }
+
   .responses {
-    width: 100%;
-    height: 100%;
+    width: 95%;
+    padding: 0 10px;
   }
+
   .user {
-    max-width: 70%;
-    padding: 10px;
+    max-width: 85%;
+    padding: 12px;
+    font-size: 13px;
   }
+
+  .ai-response {
+    font-size: 13px;
+    padding: 12px;
+  }
+
   form {
-    width: 98vw;
+    width: 95vw;
+    padding: 0 5px;
   }
 }
