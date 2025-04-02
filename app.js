@@ -2,6 +2,7 @@ const { GoogleGenAI } = require("@google/genai");
 const { marked } = require("marked");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
+const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const express = require("express");
@@ -25,7 +26,7 @@ app.post("/chat", async (req, res) => {
   let { userPrompt } = req.body;
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro-exp-03-25",
+      model: "gemini-2.0-flash",
       contents: userPrompt,
     });
     let result = marked(response.text);
@@ -35,7 +36,8 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-let i = 1
+let i = 1;
+
 function saveFile(data) {
   const doc = new PDFDocument();
   const filePath = path.join(__dirname, "proposals", `proposal${i}.pdf`);
@@ -53,15 +55,15 @@ function saveFile(data) {
 
   writeStream.on("finish", () => {
     console.log("PDF Created");
-    i++;
   });
+  i++;
 }
 
 app.post("/chat/proposal", async (req, res) => {
   let { userPrompt } = req.body;
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro-exp-03-25",
+      model: "gemini-2.0-flash",
       contents: userPrompt,
       config: {
         systemInstruction:
@@ -76,12 +78,47 @@ app.post("/chat/proposal", async (req, res) => {
   }
 });
 
-
 app.get("/download/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, "proposals", filename);
   res.download(filePath);
 });
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "nithingodeshi33@gmail.com",
+    pass: "vgho aqff emht nnjm",
+  },
+});
+
+async function sendMail(to, filename) {
+  const filePath = path.join(__dirname, "proposals", filename);
+  const info = await transporter.sendMail({
+    from: "nithingodeshi33@gmail.com", // sender address
+    to: to, // list of receivers
+    subject: "Halo ai business proposal", // Subject line
+    text: "Hello world?", // plain text body
+
+    attachments: [
+      {
+        path: filePath, // Changed from 'filePath' string to the actual filePath variable
+      },
+    ],
+  });
+
+  console.log("Message sent: %s", info.response);
+}
+
+app.post("/send-email", async (req, res) => {
+  const { email, filename } = req.body;
+  try {
+    await sendMail(email, filename);
+    res.status(200).send({ message: "Email sent successfully" });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).send({ message: "Error sending email" });
+  }
+});
 
 module.exports = app;
