@@ -16,7 +16,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const ai = new GoogleGenAI({ apiKey : "AIzaSyCohoNwm0_k4qYbehPJce7_cMijmIKiMEU" });
+const ai = new GoogleGenAI({ apiKey : process.env.MY_API_KEY});
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -99,29 +99,29 @@ const transporter = nodemailer.createTransport({
 async function sendMail(to, filename) {
   const filePath = path.join(__dirname, "proposals", filename);
   const info = await transporter.sendMail({
-    from: "nithingodeshi33@gmail.com", // sender address
-    to: to, // list of receivers
-    subject: "Halo ai business proposal", // Subject line
-    text: "Hello world?", // plain text body
+    from: "nithingodeshi33@gmail.com", 
+    to: to, 
+    subject: "Halo ai business proposal", 
+    text: "Hello world?", 
 
     attachments: [
       {
-        path: filePath, // Changed from 'filePath' string to the actual filePath variable
+        path: filePath,
       },
     ],
   });
 
-  console.log("Message sent: %s", info.response);
+  console.log("Email sent: %s", info.response);
 }
 
 app.post("/send-email", async (req, res) => {
   const { email, filename } = req.body;
   try {
     await sendMail(email, filename);
-    res.status(200).send({ message: "Email sent successfully" });
+    res.send({ message: "Email sent successfully" });
   } catch (error) {
     console.error("Error sending email:", error);
-    res.status(500).send({ message: "Error sending email" });
+    res.send({ message: "Error sending email" });
   }
 });
 

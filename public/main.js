@@ -1,16 +1,14 @@
 let textarea = document.querySelector("textarea");
 textarea.addEventListener("keyup", (e) => {
-  textarea.style.height = "auto";
+  textarea.style.height = "45px";
   textarea.style.height = `${textarea.scrollHeight}px`;
-  
-  // Add functionality to submit on Enter key (without Shift)
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
-    button.click(); // Trigger button click event
+    button.click();
+    textarea.style.height = "45px";
   }
 });
 
-let userTextBox = document.querySelector("#userTextBox");
 let responseBox = document.querySelector(".response-box");
 let button = document.querySelector("#submit");
 
@@ -40,7 +38,7 @@ proposal.addEventListener("click", () => {
     url = "http://localhost:3000/chat/proposal";
     console.log(url);
   } else {
-    proposal.style.backgroundColor = "black";
+    proposal.style.backgroundColor = "#000000b4";
     proposal.style.color = "whitesmoke";
     url = "http://localhost:3000/chat";
     console.log(url);
@@ -49,10 +47,6 @@ proposal.addEventListener("click", () => {
 });
 
 button.addEventListener("click", async (event) => {
-  let key = event.key;
-  if (key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-  }
   event.preventDefault();
   if (textarea.value.trim() === "") {
     textarea.placeholder = "Please type something";
@@ -86,11 +80,10 @@ button.addEventListener("click", async (event) => {
       let aiResponse = await response.json();
       let updateAiResponse = document.querySelector(`#ai-response${i}`);
       if (url === "http://localhost:3000/chat/proposal") {
-        updateAiResponse.innerHTML =
-          `<div><a href="/download/proposal${i}.pdf" download>Download</a></div> <div>
-  <input type="email" placeholder="Email" id="email${i}"/>  
-  <button type="button" id="send${i}">Send</button>
-</div>` + aiResponse.message;
+        updateAiResponse.innerHTML = aiResponse.message +
+          `<div class = "mail-n-download"><a href="/download/proposal${i}.pdf" class = "download-btn" download><img src="assets/icons/download.svg" alt="download"></a>
+          <div class = "email-btn"><input type="email" placeholder="Enter your email" id="email${i}"/>  
+          <button type="button" id="send${i}"><img src="assets/icons/mail.svg" alt="download"></button></div></div>`;
       } else {
         updateAiResponse.innerHTML = aiResponse.message;
       }
@@ -104,24 +97,30 @@ button.addEventListener("click", async (event) => {
         ai: aiResponse.message,
       });
       localStorage.setItem("localdata", JSON.stringify(saveHistory));
+      console.log("this is LS down",i);
+      let currentID = i
       const sendEmail = document.querySelector(`#send${i}`);
       sendEmail.addEventListener("click", async (event) => {
         event.preventDefault();
-        const email = document.querySelector(`#email${i-1}`).value;
+        sendEmail.querySelector("img").src = "assets/icons/check.svg"
+        const email = document.querySelector(`#email${currentID}`).value;
         console.log(email);
-        let filename = `proposal${i-1}.pdf`;
-        let response = await fetch("http://localhost:3000/send-email", {
+        let filename = `proposal${currentID}.pdf`;
+        console.log(filename);
+        await fetch("http://localhost:3000/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email , filename : filename}),
+          body: JSON.stringify({ email: email, filename: filename }),
         });
+
+      sendEmail.querySelector("img").src = "assets/icons/mail.svg"
       });
-      i++;
     } catch (error) {
       console.log("Error: ", error);
     }
     button.disabled = false;
     button.style.cursor = "pointer";
+    i++;
   }
 });
 
