@@ -14,7 +14,7 @@ let button = document.querySelector("#submit");
 
 let saveHistory = JSON.parse(localStorage.getItem("localdata")) || [];
 let i = saveHistory.length + 1;
-
+let j = 0;
 const displayHistory = () => {
   const entries = saveHistory;
   entries.forEach((entry) => {
@@ -80,10 +80,38 @@ button.addEventListener("click", async (event) => {
       let aiResponse = await response.json();
       let updateAiResponse = document.querySelector(`#ai-response${i}`);
       if (url === "http://localhost:3000/chat/proposal") {
-        updateAiResponse.innerHTML = aiResponse.message +
-          `<div class = "mail-n-download"><a href="/download/proposal${i}.pdf" class = "download-btn" download><img src="assets/icons/download.svg" alt="download"></a>
-          <div class = "email-btn"><input type="email" placeholder="Enter your email" id="email${i}"/>  
-          <button type="button" id="send${i}"><img src="assets/icons/mail.svg" alt="download"></button></div></div>`;
+        j++;
+        updateAiResponse.innerHTML =
+          aiResponse.message +
+          `<div class = "mail-n-download"><a href="/download/proposal${j}.pdf" class = "download-btn" download><img src="assets/icons/download.svg" alt="download"></a>
+          <div class = "email-btn"><input type="email" placeholder="Enter your email" id="email${j}"/>
+          <button type="button" id="send${j}"><img src="assets/icons/mail.svg" alt="download"></button></div></div>`;
+        console.log("J inside if else", j);
+
+        let current = j;
+        document
+          .querySelector(`#send${current}`)
+          .addEventListener("click", async () => {
+            let email = document.querySelector(`#email${current}`).value.trim();
+            let filename = `proposal${current}.pdf`;
+
+            if (!email) {
+              document.querySelector(`#email${current}`).placeholder =
+                "Please enter a valid email";
+              return;
+            }
+
+            let sendButton = document.querySelector(`#send${current} img`);
+            sendButton.src = "assets/icons/check.svg";
+
+            await fetch("http://localhost:3000/send-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, filename }),
+            });
+
+            sendButton.src = "assets/icons/mail.svg";
+          });
       } else {
         updateAiResponse.innerHTML = aiResponse.message;
       }
@@ -97,24 +125,6 @@ button.addEventListener("click", async (event) => {
         ai: aiResponse.message,
       });
       localStorage.setItem("localdata", JSON.stringify(saveHistory));
-      console.log("this is LS down",i);
-      let currentID = i
-      const sendEmail = document.querySelector(`#send${i}`);
-      sendEmail.addEventListener("click", async (event) => {
-        event.preventDefault();
-        sendEmail.querySelector("img").src = "assets/icons/check.svg"
-        const email = document.querySelector(`#email${currentID}`).value;
-        console.log(email);
-        let filename = `proposal${currentID}.pdf`;
-        console.log(filename);
-        await fetch("http://localhost:3000/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email, filename: filename }),
-        });
-
-      sendEmail.querySelector("img").src = "assets/icons/mail.svg"
-      });
     } catch (error) {
       console.log("Error: ", error);
     }
