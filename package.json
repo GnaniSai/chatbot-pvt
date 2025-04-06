@@ -11,10 +11,12 @@
   "description": "",
   "dependencies": {
     "@google/genai": "^0.6.1",
+    "buffer": "^6.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "marked": "^15.0.7",
+    "mongoose": "^8.13.2",
     "nodemailer": "^6.10.0",
     "pdfkit": "^0.16.0"
   },

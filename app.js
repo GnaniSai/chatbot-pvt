@@ -91,15 +91,15 @@ app.get("/download/:filename", (req, res) => {
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "nithingodeshi33@gmail.com",
-    pass: "vgho aqff emht nnjm",
+    user: process.env.MY_GMAIL_ADDRESS,
+    pass: process.env.MY_GMAIL_PASSWORD,
   },
 });
 
 async function sendMail(to, filename) {
   const filePath = path.join(__dirname, "proposals", filename);
   const info = await transporter.sendMail({
-    from: "nithingodeshi33@gmail.com",
+    from: process.env.MY_GMAIL_ADDRESS,
     to: to,
     subject: "Halo ai business proposal",
     text: "Hello world?",
