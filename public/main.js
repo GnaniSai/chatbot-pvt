@@ -69,7 +69,9 @@ button.addEventListener("click", async (event) => {
   textarea.style.height = "auto";
   textarea.placeholder = "Let's Chat";
 
-  document.querySelector(`#response${i}`).scrollIntoView({ behavior: "smooth", block: "start" });
+  document
+    .querySelector(`#response${i}`)
+    .scrollIntoView({ behavior: "smooth", block: "start" });
 
   try {
     let response = await fetch(url, {
@@ -82,67 +84,83 @@ button.addEventListener("click", async (event) => {
     let updateAiResponse = document.querySelector(`#ai-response${i}`);
     if (url === "https://halo-ai.onrender.com/chat/proposal") {
       j++;
-      updateAiResponse.innerHTML =
-        aiResponse.message +
-        `<div class="mail-n-download">
-          <button class="download-btn" id="download${j}" title="Download PDF">
-            <img src="icons/download.svg" alt="download" />
-          </button>
-          <div class="email-btn">
-            <input type="email" placeholder="Enter your email" id="email${j}" />
-            <button type="button" id="send${j}">
-              <img src="icons/mail.svg" alt="mail" />
-            </button>
-          </div>
-        </div>`;
+      updateAiResponse.innerHTML = `
+  <div class="proposal-wrapper">
+    <div class="proposal-text">${aiResponse.message}</div>
+    <div class="mail-n-download">
+      <button class="download-btn" id="download${j}" title="Download PDF">
+        <img src="icons/download.svg" alt="download" />
+      </button>
+      <div class="email-btn">
+        <input type="email" placeholder="Enter your email" id="email${j}" />
+        <button type="button" id="send${j}">
+          <img src="icons/mail.svg" alt="mail" />
+        </button>
+      </div>
+    </div>
+  </div>
+`;
 
       const current = j;
 
-      document.querySelector(`#send${current}`).addEventListener("click", async () => {
-        let email = document.querySelector(`#email${current}`).value.trim();
-        let proposalText = document.querySelector(`#ai-response${current}`).innerText;
+      document
+        .querySelector(`#send${current}`)
+        .addEventListener("click", async (e) => {
+          let email = document.querySelector(`#email${current}`).value.trim();
+          const proposalText = e.target
+            .closest(".proposal-wrapper")
+            .querySelector(".proposal-text").innerText;
 
-        if (!email) {
-          document.querySelector(`#email${current}`).placeholder = "Please enter a valid email";
-          return;
-        }
+          if (!email) {
+            document.querySelector(`#email${current}`).placeholder =
+              "Please enter a valid email";
+            return;
+          }
 
-        let sendIcon = document.querySelector(`#send${current} img`);
-        sendIcon.src = "icons/check.svg";
+          let sendIcon = document.querySelector(`#send${current} img`);
+          sendIcon.src = "icons/check.svg";
 
-        await fetch("https://halo-ai.onrender.com/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, proposalText }),
+          await fetch("https://halo-ai.onrender.com/send-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, proposalText }),
+          });
+
+          sendIcon.src = "icons/mail.svg";
         });
 
-        sendIcon.src = "icons/mail.svg";
-      });
+      document
+        .querySelector(`#download${current}`)
+        .addEventListener("click", async (e) => {
+          const proposalText = e.target
+            .closest(".proposal-wrapper")
+            .querySelector(".proposal-text").innerText;
 
-      document.querySelector(`#download${current}`).addEventListener("click", async () => {
-        const proposalText = document.querySelector(`#ai-response${current}`).innerText;
+          const response = await fetch(
+            "https://halo-ai.onrender.com/generate-pdf",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ proposalText }),
+            }
+          );
 
-        const response = await fetch("https://halo-ai.onrender.com/generate-pdf", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ proposalText }),
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "proposal.pdf";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
         });
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "proposal.pdf";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      });
-
     } else {
       updateAiResponse.innerHTML = aiResponse.message;
     }
 
-    document.querySelector(`#response${i}`).scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .querySelector(`#response${i}`)
+      .scrollIntoView({ behavior: "smooth", block: "start" });
 
     saveHistory.push({
       id: i,
@@ -150,7 +168,6 @@ button.addEventListener("click", async (event) => {
       ai: aiResponse.message,
     });
     localStorage.setItem("localdata", JSON.stringify(saveHistory));
-
   } catch (error) {
     console.log("Error: ", error);
   }
