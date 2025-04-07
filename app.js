@@ -6,11 +6,11 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const express = require("express");
-
 const bodyParser = require("body-parser");
 const path = require("path");
 const app = express();
 const cors = require("cors");
+
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
@@ -34,43 +34,21 @@ app.post("/chat", async (req, res) => {
       contents: userPrompt,
     });
     let result = marked(response.text);
-    return res.status(200).send({ message: result }).json();
+    return res.status(200).send({ message: result });
   } catch (error) {
     console.log("Error:", error);
   }
 });
 
-let i = 1;
-
-function saveFile(data) {
-  const doc = new PDFDocument();
-  const filePath = path.join(__dirname, "proposals", `proposal${i}.pdf`);
-  const writeStream = fs.createWriteStream(filePath);
-
-  doc.pipe(writeStream);
-
-  doc.fontSize(12);
-  doc.text(data, {
-    align: "left",
-    lineGap: 5,
-  });
-
-  doc.end();
-
-  writeStream.on("finish", () => {
-    console.log("PDF Created");
-  });
-  i++;
-}
 
 const getPDFBuffer = (data) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument();
     const chunks = [];
 
-    doc.on('data', chunk => chunks.push(chunk));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
+    doc.on("data", chunk => chunks.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
 
     doc.fontSize(12);
     doc.text(data, {
@@ -81,8 +59,6 @@ const getPDFBuffer = (data) => {
     doc.end();
   });
 };
-
-
 
 app.post("/chat/proposal", async (req, res) => {
   let { userPrompt } = req.body;
@@ -96,47 +72,51 @@ app.post("/chat/proposal", async (req, res) => {
       },
     });
     let result = marked(response.text);
-     saveFile(response.text);
-    return res.status(200).send({ message: result }).json();
+    return res.status(200).send({ message: result, rawText: response.text }); 
   } catch (error) {
     console.log("Error:", error);
   }
 });
 
-app.get("/download/:filename", (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, "proposals", filename);
-  res.download(filePath);
+
+app.post("/generate-pdf", async (req, res) => {
+  const { proposalText } = req.body;
+
+  try {
+    const pdfBuffer = await getPDFBuffer(proposalText);
+    res.setHeader("Content-Disposition", "attachment; filename=proposal.pdf");
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("PDF generation error:", error);
+    res.status(500).send("Failed to generate PDF");
+  }
 });
+
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.MY_GMAIL_ADDRESS,
-    pass: process.env.MY_GMAIL_PASSWORD
+    pass: process.env.MY_GMAIL_PASSWORD,
   },
 });
 
 async function sendMail(to, pdfBuffer) {
   const info = await transporter.sendMail({
     to: to,
-    subject: 'Your Proposal',
-    text: 'Here is your proposal PDF!',
+    subject: "Your Proposal",
+    text: "Here is your proposal PDF!",
     attachments: [
       {
-        filename: 'proposal.pdf',
+        filename: "proposal.pdf",
         content: pdfBuffer,
-        contentType: 'application/pdf'
-      }
-    ]
+        contentType: "application/pdf",
+      },
+    ],
   });
   console.log("Email sent: %s", info.response);
 }
-
-
-
-
 
 app.post("/send-email", async (req, res) => {
   const { email, proposalText } = req.body;
