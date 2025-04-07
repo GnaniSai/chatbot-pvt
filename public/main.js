@@ -83,9 +83,9 @@ button.addEventListener("click", async (event) => {
         j++;
         updateAiResponse.innerHTML =
           aiResponse.message +
-          `<div class = "mail-n-download"><a href="/download/proposal${j}.pdf" class = "download-btn" download><img src="assets/icons/download.svg" alt="download"></a>
+          `<div class = "mail-n-download"><a href="/download/proposal${j}.pdf" class = "download-btn" download><img src="icons/download.svg" alt="download"></a>
           <div class = "email-btn"><input type="email" placeholder="Enter your email" id="email${j}"/>
-          <button type="button" id="send${j}"><img src="assets/icons/mail.svg" alt="download"></button></div></div>`;
+          <button type="button" id="send${j}"><img src="icons/mail.svg" alt="download"></button></div></div>`;
         console.log("J inside if else", j);
 
         let current = j;
@@ -102,7 +102,7 @@ button.addEventListener("click", async (event) => {
             }
 
             let sendButton = document.querySelector(`#send${current} img`);
-            sendButton.src = "assets/icons/check.svg";
+            sendButton.src = "icons/check.svg";
 
             await fetch("https://halo-ai.onrender.com/send-email", {
               method: "POST",
@@ -110,7 +110,7 @@ button.addEventListener("click", async (event) => {
               body: JSON.stringify({ email, filename }),
             });
 
-            sendButton.src = "assets/icons/mail.svg";
+            sendButton.src = "icons/mail.svg";
           });
       } else {
         updateAiResponse.innerHTML = aiResponse.message;
