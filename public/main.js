@@ -28,19 +28,19 @@ const displayHistory = () => {
 
 displayHistory();
 
-let url = "http://localhost:3000/chat";
+let url = "https://halo-ai.onrender.com/chat";
 const proposal = document.querySelector("#proposal");
 let proposalActive = false;
 proposal.addEventListener("click", () => {
   if (!proposalActive) {
     proposal.style.backgroundColor = "white";
     proposal.style.color = "black";
-    url = "http://localhost:3000/chat/proposal";
+    url = "https://halo-ai.onrender.com/chat/proposal";
     console.log(url);
   } else {
     proposal.style.backgroundColor = "#000000b4";
     proposal.style.color = "whitesmoke";
-    url = "http://localhost:3000/chat";
+    url = "https://halo-ai.onrender.com/chat";
     console.log(url);
   }
   proposalActive = !proposalActive;
@@ -79,7 +79,7 @@ button.addEventListener("click", async (event) => {
       console.log(url);
       let aiResponse = await response.json();
       let updateAiResponse = document.querySelector(`#ai-response${i}`);
-      if (url === "http://localhost:3000/chat/proposal") {
+      if (url === "https://halo-ai.onrender.com/chat/proposal") {
         j++;
         updateAiResponse.innerHTML =
           aiResponse.message +
@@ -104,7 +104,7 @@ button.addEventListener("click", async (event) => {
             let sendButton = document.querySelector(`#send${current} img`);
             sendButton.src = "assets/icons/check.svg";
 
-            await fetch("http://localhost:3000/send-email", {
+            await fetch("https://halo-ai.onrender.com/send-email", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email, filename }),
