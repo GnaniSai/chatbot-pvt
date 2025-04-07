@@ -104,6 +104,7 @@ app.post("/chat/proposal", async (req, res) => {
 });
 
 app.get("/download/:filename", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
   const filename = req.params.filename;
   const filePath = path.join(__dirname, "proposals", filename);
   res.download(filePath);
