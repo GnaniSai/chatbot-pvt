@@ -27,7 +27,7 @@ app.get("/chat", (req, res) => {
 });
 
 app.post("/chat", async (req, res) => {
-  let { userPrompt } = req.body;
+  const {userPrompt} = req.body
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
@@ -42,26 +42,26 @@ app.post("/chat", async (req, res) => {
 
 let i = 1;
 
-function saveFile(data) {
-  const doc = new PDFDocument();
-  const filePath = path.join(__dirname, "proposals", `proposal${i}.pdf`);
-  const writeStream = fs.createWriteStream(filePath);
+const getPDFBuffer = (data) => {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument();
+    const chunks = [];
 
-  doc.pipe(writeStream);
+    doc.on('data', chunk => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
 
-  doc.fontSize(12);
-  doc.text(data, {
-    align: "left",
-    lineGap: 5,
+    doc.fontSize(12);
+    doc.text(data, {
+      align: "center",
+      lineGap: 5,
+    });
+
+    doc.end();
   });
+};
 
-  doc.end();
 
-  writeStream.on("finish", () => {
-    console.log("PDF Created");
-  });
-  i++;
-}
 
 app.post("/chat/proposal", async (req, res) => {
   let { userPrompt } = req.body;
@@ -71,11 +71,10 @@ app.post("/chat/proposal", async (req, res) => {
       contents: userPrompt,
       config: {
         systemInstruction:
-          "Generate a well-structured business proposal that includes the following aspects: Business Name, Industry, Problem Statement, Solution, Target Market, Unique Value Proposition, Revenue Model, Operational Plan, Marketing Strategy, Financial Projections, and Funding Requirements. Present the proposal in a natural and varied format suitable for professional presentation. Avoid repetitive templates. Feel free to structure the content in a way that best fits the context of the business idea. Use formal yet engaging language, and ensure all details are covered clearly and concisely, without extra introductions or summaries.",
+          "Generate a structured business proposal based on the provided inputs, including Business Name, Industry, Problem Statement, Solution, Target Market, Unique Value Proposition, Revenue Model, Operational Plan, Marketing Strategy, Financial Projections, and Funding Requirements. The output should be formal, concise, and directly present the business details without any introductions, summaries, or conclusions.",
       },
     });
     let result = marked(response.text);
-    saveFile(response.text);
     return res.status(200).send({ message: result }).json();
   } catch (error) {
     console.log("Error:", error);
@@ -92,37 +91,42 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.MY_GMAIL_ADDRESS,
-    pass: process.env.MY_GMAIL_PASSWORD,
+    pass: process.env.MY_GMAIL_PASSWORD
   },
 });
 
-async function sendMail(to, filename) {
-  const filePath = path.join(__dirname, "proposals", filename);
+async function sendMail(to, pdfBuffer) {
   const info = await transporter.sendMail({
-    from: process.env.MY_GMAIL_ADDRESS,
     to: to,
-    subject: "Halo ai business proposal",
-    text: "Hello world?",
-
+    subject: 'Your Proposal',
+    text: 'Here is your proposal PDF!',
     attachments: [
       {
-        path: filePath,
-      },
-    ],
+        filename: 'proposal.pdf',
+        content: pdfBuffer,
+        contentType: 'application/pdf'
+      }
+    ]
   });
-
   console.log("Email sent: %s", info.response);
 }
 
+
+
+
+
 app.post("/send-email", async (req, res) => {
-  const { email, filename } = req.body;
+  const { email, proposalText } = req.body;
   try {
-    await sendMail(email, filename);
+    const pdfBuffer = await getPDFBuffer(proposalText);
+    await sendMail(email, pdfBuffer);
     res.send({ message: "Email sent successfully" });
   } catch (error) {
     console.error("Error sending email:", error);
-    res.send({ message: "Error sending email" });
+    res.status(500).send({ message: "Error sending email" });
   }
 });
+
+
 
 module.exports = app;

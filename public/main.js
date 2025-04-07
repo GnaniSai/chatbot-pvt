@@ -85,33 +85,33 @@ button.addEventListener("click", async (event) => {
           aiResponse.message +
           `<div class = "mail-n-download"><a href="/download/proposal${j}.pdf" class = "download-btn" download><img src="icons/download.svg" alt="download"></a>
           <div class = "email-btn"><input type="email" placeholder="Enter your email" id="email${j}"/>
-          <button type="button" id="send${j}"><img src="icons/mail.svg" alt="download"></button></div></div>`;
+          <button type="button" id="send${j}"><img src="icons/mail.svg" alt="mail"></button></div></div>`;
         console.log("J inside if else", j);
 
         let current = j;
         document
-          .querySelector(`#send${current}`)
-          .addEventListener("click", async () => {
-            let email = document.querySelector(`#email${current}`).value.trim();
-            let filename = `proposal${current}.pdf`;
+  .querySelector(`#send${current}`)
+  .addEventListener("click", async () => {
+    let email = document.querySelector(`#email${current}`).value.trim();
+    let proposalText = document.querySelector(`#ai-response${current}`).textContent;
 
-            if (!email) {
-              document.querySelector(`#email${current}`).placeholder =
-                "Please enter a valid email";
-              return;
-            }
+    if (!email) {
+      document.querySelector(`#email${current}`).placeholder = "Please enter a valid email";
+      return;
+    }
 
-            let sendButton = document.querySelector(`#send${current} img`);
-            sendButton.src = "icons/check.svg";
+    let sendButton = document.querySelector(`#send${current} img`);
+    sendButton.src = "icons/check.svg";
 
-            await fetch("https://halo-ai.onrender.com/send-email", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, filename }),
-            });
+    await fetch("https://halo-ai.onrender.com/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, proposalText }),
+    });
 
-            sendButton.src = "icons/mail.svg";
-          });
+    sendButton.src = "icons/mail.svg";
+  });
+
       } else {
         updateAiResponse.innerHTML = aiResponse.message;
       }
