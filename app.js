@@ -71,7 +71,7 @@ app.post("/chat/proposal", async (req, res) => {
       contents: userPrompt,
       config: {
         systemInstruction:
-          "Generate a structured business proposal based on the provided inputs, including Business Name, Industry, Problem Statement, Solution, Target Market, Unique Value Proposition, Revenue Model, Operational Plan, Marketing Strategy, Financial Projections, and Funding Requirements. The output should be formal, concise, and directly present the business details without any introductions, summaries, or conclusions.",
+          "Generate a well-structured business proposal that includes the following aspects: Business Name, Industry, Problem Statement, Solution, Target Market, Unique Value Proposition, Revenue Model, Operational Plan, Marketing Strategy, Financial Projections, and Funding Requirements. Present the proposal in a natural and varied format suitable for professional presentation. Avoid repetitive templates. Feel free to structure the content in a way that best fits the context of the business idea. Use formal yet engaging language, and ensure all details are covered clearly and concisely, without extra introductions or summaries.",
       },
     });
     let result = marked(response.text);
