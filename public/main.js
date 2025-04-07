@@ -83,7 +83,7 @@ button.addEventListener("click", async (event) => {
         j++;
         updateAiResponse.innerHTML =
           aiResponse.message +
-          `<div class = "mail-n-download"><a href="/download/proposal${j}.pdf" class = "download-btn" download><img src="icons/download.svg" alt="download"></a>
+          `<div class = "mail-n-download"><a href="https://halo-ai.onrender.com/download/proposal${j}.pdf" class = "download-btn" download><img src="icons/download.svg" alt="download"></a>
           <div class = "email-btn"><input type="email" placeholder="Enter your email" id="email${j}"/>
           <button type="button" id="send${j}"><img src="icons/mail.svg" alt="mail"></button></div></div>`;
         console.log("J inside if else", j);
@@ -93,7 +93,7 @@ button.addEventListener("click", async (event) => {
   .querySelector(`#send${current}`)
   .addEventListener("click", async () => {
     let email = document.querySelector(`#email${current}`).value.trim();
-    let proposalText = document.querySelector(`#ai-response${current}`).textContent;
+    let proposalText = document.querySelector(`#ai-response${current}`).innerText;
 
     if (!email) {
       document.querySelector(`#email${current}`).placeholder = "Please enter a valid email";
@@ -106,7 +106,7 @@ button.addEventListener("click", async (event) => {
     await fetch("https://halo-ai.onrender.com/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, proposalText }),
+      body: JSON.stringify({ email, proposalText }), 
     });
 
     sendButton.src = "icons/mail.svg";

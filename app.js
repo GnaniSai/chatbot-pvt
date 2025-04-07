@@ -27,7 +27,7 @@ app.get("/chat", (req, res) => {
 });
 
 app.post("/chat", async (req, res) => {
-  const {userPrompt} = req.body
+  let { userPrompt } = req.body;
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
@@ -42,6 +42,27 @@ app.post("/chat", async (req, res) => {
 
 let i = 1;
 
+function saveFile(data) {
+  const doc = new PDFDocument();
+  const filePath = path.join(__dirname, "proposals", `proposal${i}.pdf`);
+  const writeStream = fs.createWriteStream(filePath);
+
+  doc.pipe(writeStream);
+
+  doc.fontSize(12);
+  doc.text(data, {
+    align: "left",
+    lineGap: 5,
+  });
+
+  doc.end();
+
+  writeStream.on("finish", () => {
+    console.log("PDF Created");
+  });
+  i++;
+}
+
 const getPDFBuffer = (data) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument();
@@ -53,7 +74,7 @@ const getPDFBuffer = (data) => {
 
     doc.fontSize(12);
     doc.text(data, {
-      align: "center",
+      align: "left",
       lineGap: 5,
     });
 
@@ -71,10 +92,11 @@ app.post("/chat/proposal", async (req, res) => {
       contents: userPrompt,
       config: {
         systemInstruction:
-          "Generate a structured business proposal based on the provided inputs, including Business Name, Industry, Problem Statement, Solution, Target Market, Unique Value Proposition, Revenue Model, Operational Plan, Marketing Strategy, Financial Projections, and Funding Requirements. The output should be formal, concise, and directly present the business details without any introductions, summaries, or conclusions.",
+          "Generate a well-structured business proposal that includes the following aspects: Business Name, Industry, Problem Statement, Solution, Target Market, Unique Value Proposition, Revenue Model, Operational Plan, Marketing Strategy, Financial Projections, and Funding Requirements. Present the proposal in a natural and varied format suitable for professional presentation. Avoid repetitive templates. Feel free to structure the content in a way that best fits the context of the business idea. Use formal yet engaging language, and ensure all details are covered clearly and concisely, without extra introductions or summaries.",
       },
     });
     let result = marked(response.text);
+     saveFile(response.text);
     return res.status(200).send({ message: result }).json();
   } catch (error) {
     console.log("Error:", error);
@@ -126,7 +148,5 @@ app.post("/send-email", async (req, res) => {
     res.status(500).send({ message: "Error sending email" });
   }
 });
-
-
 
 module.exports = app;
